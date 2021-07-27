@@ -1,0 +1,17 @@
+table_catalog,table_schema,table_name,table_type,is_insertable_into,is_typed,creation_time
+bigquery-public-data,stackoverflow,posts_answers,BASE TABLE,YES,NO,2016-10-31T18:31:25Z
+bigquery-public-data,stackoverflow,users,BASE TABLE,YES,NO,2016-10-26T13:29:37Z
+bigquery-public-data,stackoverflow,posts_orphaned_tag_wiki,BASE TABLE,YES,NO,2016-10-31T16:41:37Z
+bigquery-public-data,stackoverflow,posts_tag_wiki,BASE TABLE,YES,NO,2016-10-31T16:22:35Z
+bigquery-public-data,stackoverflow,stackoverflow_posts,BASE TABLE,YES,NO,2016-09-21T13:42:24Z
+bigquery-public-data,stackoverflow,posts_questions,BASE TABLE,YES,NO,2016-11-01T15:33:29Z
+bigquery-public-data,stackoverflow,comments,BASE TABLE,YES,NO,2016-10-26T13:58:04Z
+bigquery-public-data,stackoverflow,posts_tag_wiki_excerpt,BASE TABLE,YES,NO,2016-10-31T15:16:33Z
+bigquery-public-data,stackoverflow,posts_wiki_placeholder,BASE TABLE,YES,NO,2016-10-31T16:17:55Z
+bigquery-public-data,stackoverflow,posts_privilege_wiki,BASE TABLE,YES,NO,2016-10-31T18:00:16Z
+bigquery-public-data,stackoverflow,post_history,BASE TABLE,YES,NO,2016-10-26T14:46:37Z
+bigquery-public-data,stackoverflow,badges,BASE TABLE,YES,NO,2016-10-26T13:50:17Z
+bigquery-public-data,stackoverflow,post_links,BASE TABLE,YES,NO,2016-10-26T13:51:01Z
+bigquery-public-data,stackoverflow,tags,BASE TABLE,YES,NO,2016-10-26T14:17:12Z
+bigquery-public-data,stackoverflow,votes,BASE TABLE,YES,NO,2016-10-26T13:34:58Z
+bigquery-public-data,stackoverflow,posts_moderator_nomination,BASE TABLE,YES,NO,2016-10-31T16:20:06Z
