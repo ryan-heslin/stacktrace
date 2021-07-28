@@ -1,5 +1,6 @@
 
 # Required packages -------------------------------------------------------
+library(shiny)
 library(DBI)
 library(bigrquery)
 library(ggplot2)
