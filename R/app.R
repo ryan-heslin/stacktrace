@@ -33,7 +33,7 @@ ui <- navbarPage(
     sidebarLayout(
       sidebarPanel(textInput(inputId = "username", label = "Enter a username:"),
                    actionButton("username_button", "Search"),
-                   uiOutput("select_user")),
+                   ),
       mainPanel(
         fluidRow(column(6, tableOutput("table_user")), column(
           6,
@@ -162,18 +162,6 @@ server <- function(input, output, session) {
     }
   }
   )
-  
-  output$select_user <- renderUI({
-   if(nrow(user_key()) > 1){
-     radioButtons("select_user", choices = user_key()$Name,
-                        label = "Disambiguate username:")
-   } 
-  })
-  
-  disambiguate_user <- observeEvent(input$select_user, {
-    input$username <- input$select_user
-  }, ignoreNULL = TRUE,
-  ignoreInit = TRUE)
     
   output$table_user <-
     renderTable({
