@@ -31,9 +31,10 @@ ui <- navbarPage(
   tabPanel(
     "Users",
     sidebarLayout(
-      sidebarPanel(textInput(inputId = "username", label = "Enter a username:"),
-                   actionButton("username_button", "Search"),
-                   uiOutput("select_user")),
+      sidebarPanel(div(id = "textInput",
+        textInput(inputId = "username", label = "Enter a username:"),
+                   actionButton("username_button", "Search")
+      )),
       mainPanel(
         fluidRow(column(6, tableOutput("table_user")), column(
           6,
@@ -61,7 +62,7 @@ ui <- navbarPage(
         "Select language",
         choices = LANGUAGES,
         selected = character(0)
-      ),
+      )
     ),
     mainPanel(
       fluidRow(
@@ -70,7 +71,7 @@ ui <- navbarPage(
         ),
         column(
           6,
-          plotOutput("plot_language_activity"),
+          plotOutput("plot_language_activity")
         )
       ),
       fluidRow(column(
@@ -100,9 +101,11 @@ ui <- navbarPage(
   )
 )
 server <- function(input, output, session) {
-  user_key <- eventReactive(input$username_button,
-    {
-        dbGetQuery(
+  
+  multiple_users <- reactiveVal(FALSE)
+  
+  user_key <- eventReactive(input$username, {
+    data <- dbGetQuery(
           con,
           "SELECT id, display_name AS Name, creation_date AS Date,
                          location AS Location, reputation AS Reputation
@@ -110,33 +113,43 @@ server <- function(input, output, session) {
           parameters = list(x = input$username)
         ) %>% 
         mutate(Date = format(Date, "%B %d, %Y"))
+      
+    validate_df(data, input$username, "No user named") 
+    data
     },
     ignoreInit = TRUE,
     ignoreNULL = TRUE
   )
-  user_data <- eventReactive(user_key(), {
-    validate_df(user_key(), input$username, "No user named") 
+  
+  n_users <- reactive(user_key(), {
+    nrow(user_key())
+  })
+  
+  user_filtered <- eventReactive(input$select_user, {
+    user_key()[user_key()$id == input$select_user,]
+  })
+  user_data <- eventReactive(user_filtered(), {
       questions <-
         dbGetQuery(
           con,
           "SELECT id, title AS Title, creation_date AS Date, tags AS Tags, body AS Text,
                         score AS Score
-                    FROM posts_questions WHERE owner_user_id = @x",
-          parameters = list(x = user_key()$id)
+                    FROM posts_questions WHERE owner_user_id IN UNNEST(@x)",
+          parameters = list(x = user_filtered()$id)
         )
       answers <-
         dbGetQuery(
           con,
           "SELECT id, title AS Title, creation_date AS Date, tags AS Tags, body AS Text, score AS Score
-                    FROM posts_answers WHERE owner_user_id = @x",
-          parameters = list(x = user_key()$id)
+                    FROM posts_answers WHERE owner_user_id IN UNNEST(@x)",
+          parameters = list(x = user_filtered()$id)
         )
       comments <-
         dbGetQuery(
           con,
           "SELECT id, creation_date AS Date, score AS Score, text AS Text,
-                       FROM comments WHERE user_id = @x",
-          parameters = list(x = user_key()$id)
+                       FROM comments WHERE user_id IN UNNEST(@x)",
+          parameters = list(x = user_filtered()$id)
         )
       comments[, c("Title", "Tags")] <-
         NA_character_
@@ -163,21 +176,31 @@ server <- function(input, output, session) {
   }
   )
   
-  output$select_user <- renderUI({
-   if(nrow(user_key()) > 1){
-     radioButtons("select_user", choices = user_key()$Name,
-                        label = "Disambiguate username:")
-   } 
-  })
-  
-  disambiguate_user <- observeEvent(input$select_user, {
-    input$username <- input$select_user
+  disambiguate_user <- observeEvent(n_users(), {
+    if(n_users() > 1){
+      insertUI(
+        selector= "#textInput",
+        ui = tags$div(
+          radioButtons("select_user", 
+                       choices = setNames(user_filtered()$id, user_filtered()$Name),
+                       selected = character(0)),
+        id = "#userSelect"
+        ),
+        where = afterEnd
+      )
+    }else{
+      removeUI(selector = "#userSelect")
+    }
   }, ignoreNULL = TRUE,
   ignoreInit = TRUE)
-    
+  
+  # send_single_username <- observeEvent(input$select_user, {
+  #   updateTextInput(inputId = "username")
+  #   updateActionButton(inputId = "username_button")
+  # } )
   output$table_user <-
     renderTable({
-      user_key()[, c("Name", "Date", "Location", "Reputation")]
+      user_filtered()[, c("Name", "Date", "Location", "Reputation")]
     })
   
   output$text_user_top_rated <-
@@ -251,7 +274,7 @@ server <- function(input, output, session) {
       data
     }
   
-      },
+      }
     )
 
   output$plot_language_activity <-
