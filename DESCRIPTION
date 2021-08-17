@@ -1,0 +1,17 @@
+Package: stacktrace
+Title: Explore and visulazie StackOverflow Post Data
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Ryan",
+           family = "Heslin",
+           role = c("aut", "cre"),
+           email = "first.last@example.com")
+Description: stacktrace uses Google Cloud's BigQuery platform, together with the bigrquery package, to explore a large dataset of StackOverflow posts and comments. 
+License: `use_mit_license()`
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
