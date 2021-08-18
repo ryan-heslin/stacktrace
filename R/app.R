@@ -26,6 +26,8 @@ LANGUAGES <- c(
 TABLE_NAMES <- c(comment = "comments",
                  question = "posts_questions",
                  answer = "posts_answers")
+
+id <- NULL
 ui <- navbarPage(
   "Navbar",
   tabPanel(
@@ -101,10 +103,9 @@ ui <- navbarPage(
   )
 )
 server <- function(input, output, session) {
-  
-  multiple_users <- reactiveVal(FALSE)
-  
-  user_key <- eventReactive(input$username, {
+ 
+  id <- reactiveVal(integer()) 
+  user_key <- eventReactive(input$username_button, {
     data <- dbGetQuery(
           con,
           "SELECT id, display_name AS Name, creation_date AS Date,
@@ -116,17 +117,11 @@ server <- function(input, output, session) {
       
     validate_df(data, input$username, "No user named") 
     data
-    },
-    ignoreInit = TRUE,
-    ignoreNULL = TRUE
+    }
   )
   
-  n_users <- reactive(user_key(), {
-    nrow(user_key())
-  })
-  
-  user_filtered <- eventReactive(input$select_user, {
-    user_key()[user_key()$id == input$select_user,]
+  user_filtered <- eventReactive(id(), {
+    user_key()[user_key()$id == id(),]
   })
   user_data <- eventReactive(user_filtered(), {
       questions <-
@@ -134,21 +129,21 @@ server <- function(input, output, session) {
           con,
           "SELECT id, title AS Title, creation_date AS Date, tags AS Tags, body AS Text,
                         score AS Score
-                    FROM posts_questions WHERE owner_user_id IN UNNEST(@x)",
+                    FROM posts_questions WHERE owner_user_id = @x",
           parameters = list(x = user_filtered()$id)
         )
       answers <-
         dbGetQuery(
           con,
           "SELECT id, title AS Title, creation_date AS Date, tags AS Tags, body AS Text, score AS Score
-                    FROM posts_answers WHERE owner_user_id IN UNNEST(@x)",
+                    FROM posts_answers WHERE owner_user_id = @x",
           parameters = list(x = user_filtered()$id)
         )
       comments <-
         dbGetQuery(
           con,
           "SELECT id, creation_date AS Date, score AS Score, text AS Text,
-                       FROM comments WHERE user_id IN UNNEST(@x)",
+                       FROM comments WHERE user_id = @x",
           parameters = list(x = user_filtered()$id)
         )
       comments[, c("Title", "Tags")] <-
@@ -176,28 +171,30 @@ server <- function(input, output, session) {
   }
   )
   
-  disambiguate_user <- observeEvent(n_users(), {
-    if(n_users() > 1){
+  excess_users <- observeEvent(user_key(), {
+    if(nrow(user_key()) > 1){
       insertUI(
         selector= "#textInput",
         ui = tags$div(
           radioButtons("select_user", 
-                       choices = setNames(user_filtered()$id, user_filtered()$Name),
-                       selected = character(0)),
-        id = "#userSelect"
+                       choices = setNames(user_key()$id, user_key()$Name),
+                       selected = character(0),
+                       label = sprintf("%d users named %s. Choose one:", 
+                       nrow(user_key()), input$username)),
+        id = "userSelect"
         ),
-        where = afterEnd
+        where = "afterEnd"
       )
     }else{
-      removeUI(selector = "#userSelect")
+      id(user_key()$id)
     }
-  }, ignoreNULL = TRUE,
-  ignoreInit = TRUE)
+  }) 
+ 
+  disambiguate_user <- observeEvent(input$select_user, {
+    id(input$select_user)
+    removeUI(selector = "#userSelect", immediate = TRUE)
+  }) 
   
-  # send_single_username <- observeEvent(input$select_user, {
-  #   updateTextInput(inputId = "username")
-  #   updateActionButton(inputId = "username_button")
-  # } )
   output$table_user <-
     renderTable({
       user_filtered()[, c("Name", "Date", "Location", "Reputation")]
@@ -205,20 +202,22 @@ server <- function(input, output, session) {
   
   output$text_user_top_rated <-
     renderText({
-      type <- attr(user_data(), "top_type")$Type
+      type <- attr(user_data(), "top_type")
+      print(type)
       query <- paste("SELECT",
-                     dbQuoteIdentifier(con, ifelse(type == "comment", "text", "body")),
+                     dbQuoteIdentifier(con, ifelse(type$Type == "comment", "text", "body")),
                                        "FROM",
-                     dbQuoteIdentifier(con, unname(TABLE_NAMES[type])),
+                     dbQuoteIdentifier(con, unname(TABLE_NAMES[type$Type])),
                           "WHERE id = @x")
       text <- dbGetQuery(
         con,
           query, 
         parameters = list(
-          x = user_data()$top_type$id
+          x = type$id
         )
       )[[1]]
       validate(need(text, "No text found to display"))
+      text
     })
   
   output$plot_contributions <-
@@ -233,7 +232,7 @@ server <- function(input, output, session) {
     })
   output$table_tags <-
     renderTable({
-      raw_tags <- user_data()$Tags[complete.cases(user_data()$data$Tags)]
+      raw_tags <- user_data()$Tags[complete.cases(user_data()$Tags)]
       validate(need(raw_tags, paste("No tags associated with", input$username)))
       all_tags <-
         unlist(lapply(raw_tags, function(x) {
@@ -273,7 +272,6 @@ server <- function(input, output, session) {
     }else{
       data
     }
-  
       }
     )
 
