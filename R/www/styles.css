@@ -1,0 +1,64 @@
+#textInput, #language {
+ border-radius: 25px;
+ text-align:center;
+ background-color: #383631;
+ border: 1px dashed #ccc000;
+ padding: 25px 25px 25px 25px;
+}
+
+.form-group {
+  text-align: center;
+  margin: auto;
+}
+div[id^='title'], button, label, input, .form_group, .header {
+  text-align:center;
+  margin: auto;
+}
+div[id^='table'], .shiny-options-group, .shiny-input-container, {
+  margin: auto;
+}
+
+.shiny-plot-output{
+  background-color: #c46c70;
+  border-radius: 25px; 
+  display: flex;
+  align-items:center;
+  justify-content: center;
+}
+
+.posting{
+ background-color: white; 
+ border-radius: 10px;
+ padding: 25px 25px 25px 25px;
+}
+
+pre {
+  padding: 25px 25px 25px 25px;
+  margin-left: 20%;
+  margin-right: 20%;
+  background-color: #c2bfba;
+}
+
+code {
+  background-color:#c2bfba;
+}
+
+body * {
+  color: #c29751;
+}
+
+p {
+  text-indent: 30px;
+  text-align: left;
+  margin-left: 20%;
+  margin-right: 20%;
+}
+
+#userSelect {
+  font-size: 6;
+}
+
+strong {
+  margin:auto;
+  text-align:center;
+}
