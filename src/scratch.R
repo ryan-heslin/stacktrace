@@ -43,16 +43,16 @@ test_user <- dbGetQuery(con, "SELECT id, display_name AS Username, age AS age,
            ORDER BY Account_Created DESC LIMIT 1",
            parameters = list(x = "John Skeet" ))
 questions <- dbGetQuery(con, "SELECT title AS Title, creation_date AS Date, tags AS Tags,
-                        score AS Score
+                        score AS score
                     FROM posts_questions WHERE owner_user_id = @x",
                     parameters = list (x = power_users$id[1]))
 
 answers <- dbGetQuery(con, "SELECT title AS Title, creation_date AS Date, tags AS Tags, score AS score
                     FROM posts_answers WHERE owner_user_id = @x",
                     parameters = list (x = power_users$id[1]))
-comments <- dbGetQuery(con, "SELECT creation_date AS date, score AS score
+comments <- dbGetQuery(con, "SELECT creation_date AS Date, score AS score
                        FROM comments WHERE user_id = @x",parameters = list(x = power_users$id[1]) )
-
+combined <- bind_rows(questions = questions, answers = answers, comments = comments, .id = "Type")
 # contributions <- dbGetQuery(con, "SELECT posts_questions.title, posts_answers.title,
 #                             posts_questions.creation_date, posts_answers.creation_date,
 #                             posts_questions.tags, posts_answers.tags,
@@ -158,4 +158,7 @@ dbGetQuery(con, "SELECT body FROM posts_questions WHERE id IN UNNEST(@x)",
           legend.box.margin = margin(t = -10),
           panel.grid = element_blank())
   
+legend_data <- t
+
+
   
