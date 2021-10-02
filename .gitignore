@@ -3,4 +3,5 @@ tests/
 .Rhistory
 .RData
 .Ruserdata
-test.csv
+*.csv
+data/
