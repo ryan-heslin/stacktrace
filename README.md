@@ -17,7 +17,8 @@ The most technically complex plot visualizes the distribution of the most common
 
 ## Design
 
-The bulk of the project lies in the R folder, which contains all R code necessary to run the app.
+The bulk of the project lies in the R folder, which contains all R code necessary to run the app. At the top
+level, `credentials.json` contains service account credentials that allow users to access the app on my behalf.
 The main file is `app.R`, which contains the server and UI functions that power the app. In hindsight, I should have split it into separate modules.
 Supporting files include `global.R`, which defines constants and loads required packages, and `utils.R`, a collection of utility functions. The parallel `tests` folder contains rudimentary test code, and `src` contains experimental code used to test functions when designing the app.
 The `data` folder contains metadata on the BigQuery database I used for reference.
