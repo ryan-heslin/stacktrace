@@ -40,7 +40,7 @@ extract_text <- function(text){
   #Remove all non-p tags with their contents
   # See https://www.rexegg.com/regex-quantifiers.html
   text <- gsub("<((?:[^\\\\p]|[a-z]{2,}))[^>]*>(?:[^<]|<(?!\\/\\1))*<\\/\\1>", " ", text, perl = TRUE)
-  text <- gsub("<\\/?p>", "", text)
+  text <- gsub("<[^>]+>", "", text)
   text
 }
 
